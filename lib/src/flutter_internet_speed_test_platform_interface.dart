@@ -4,14 +4,14 @@ import 'package:tuple/tuple.dart';
 import 'callbacks_enum.dart';
 import 'flutter_internet_speed_test_method_channel.dart';
 
-typedef void CancelListening();
-typedef void DoneCallback(double transferRate, SpeedUnit unit);
-typedef void ProgressCallback(
+typedef CancelListening = void Function();
+typedef DoneCallback = void Function(double transferRate, SpeedUnit unit);
+typedef ProgressCallback = void Function(
   double percent,
   double transferRate,
   SpeedUnit unit,
 );
-typedef void ErrorCallback(String errorMessage, String speedTestError);
+typedef ErrorCallback = void Function(String errorMessage, String speedTestError);
 
 abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   /// Constructs a FlutterInternetSpeedTestPlatform.
@@ -19,8 +19,7 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FlutterInternetSpeedTestPlatform _instance =
-      MethodChannelFlutterInternetSpeedTest();
+  static FlutterInternetSpeedTestPlatform _instance = MethodChannelFlutterInternetSpeedTest();
 
   /// The default instance of [FlutterInternetSpeedTestPlatform] to use.
   ///
@@ -28,7 +27,7 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   static FlutterInternetSpeedTestPlatform get instance => _instance;
 
   Map<int, Tuple3<ErrorCallback, ProgressCallback, DoneCallback>>
-      callbacksById = Map();
+      callbacksById = {};
   int downloadRate = 0;
   int uploadRate = 0;
   int downloadSteps = 0;

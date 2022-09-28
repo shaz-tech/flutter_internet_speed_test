@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_internet_speed_test/flutter_internet_speed_test_method_channel.dart';
+import 'package:flutter_internet_speed_test/src/flutter_internet_speed_test_method_channel.dart';
 
 void main() {
   MethodChannelFlutterInternetSpeedTest platform = MethodChannelFlutterInternetSpeedTest();
