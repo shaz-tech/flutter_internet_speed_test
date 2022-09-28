@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:tuple/tuple.dart';
+import 'package:tuple_dart/tuple.dart';
 
 import 'callbacks_enum.dart';
 import 'flutter_internet_speed_test_platform_interface.dart';

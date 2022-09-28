@@ -8,8 +8,13 @@ A Flutter plugin to test internet download and upload speed.
 
 ```yaml
 dependencies:
-  flutter_internet_speed_test: ^1.0.0
+  flutter_internet_speed_test: ^1.0.2
 ```
+
+### Screenshots
+
+![Screenshot_20220928-191212](https://user-images.githubusercontent.com/8435335/192833714-1db9d67b-f4a1-4381-b2ba-6b400a0a1f2b.jpg) ![Screenshot_20220928-191117](https://user-images.githubusercontent.com/8435335/192833796-10f15bf1-38d0-483d-8d9b-990911cf412f.jpg)
+
 
 ### Example
 

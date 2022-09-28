@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_internet_speed_test/src/test_result.dart';
 
 import 'callbacks_enum.dart';
@@ -7,7 +8,14 @@ typedef ResultCallback = void Function(TestResult download, TestResult upload);
 typedef TestProgressCallback = void Function(double percent, TestResult data);
 
 class FlutterInternetSpeedTest {
+  static final FlutterInternetSpeedTest _instance =
+      FlutterInternetSpeedTest._private();
+
   bool _isTestInProgress = false;
+
+  factory FlutterInternetSpeedTest() => _instance;
+
+  FlutterInternetSpeedTest._private();
 
   bool isTestInProgress() => _isTestInProgress;
 
@@ -20,6 +28,9 @@ class FlutterInternetSpeedTest {
     int fileSize = 200000,
   }) async {
     if (_isTestInProgress) {
+      return false;
+    }
+    if (await isInternetAvailable() == false) {
       return false;
     }
     _isTestInProgress = true;
@@ -60,5 +71,12 @@ class FlutterInternetSpeedTest {
       testServer: downloadTestServer,
     );
     return true;
+  }
+
+  Future<bool> isInternetAvailable() async {
+    final connectivity = Connectivity();
+    final connectivityResult = await connectivity.checkConnectivity();
+    return connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi;
   }
 }

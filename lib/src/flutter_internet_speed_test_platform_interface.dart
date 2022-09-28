@@ -1,5 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:tuple/tuple.dart';
+import 'package:tuple_dart/tuple.dart';
 
 import 'callbacks_enum.dart';
 import 'flutter_internet_speed_test_method_channel.dart';
@@ -11,7 +11,8 @@ typedef ProgressCallback = void Function(
   double transferRate,
   SpeedUnit unit,
 );
-typedef ErrorCallback = void Function(String errorMessage, String speedTestError);
+typedef ErrorCallback = void Function(
+    String errorMessage, String speedTestError);
 
 abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   /// Constructs a FlutterInternetSpeedTestPlatform.
@@ -19,7 +20,8 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FlutterInternetSpeedTestPlatform _instance = MethodChannelFlutterInternetSpeedTest();
+  static FlutterInternetSpeedTestPlatform _instance =
+      MethodChannelFlutterInternetSpeedTest();
 
   /// The default instance of [FlutterInternetSpeedTestPlatform] to use.
   ///
