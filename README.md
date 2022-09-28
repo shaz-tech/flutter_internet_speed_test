@@ -19,7 +19,7 @@ dependencies:
     
     final speedTest = FlutterInternetSpeedTest();
     
-    speedTest.startDownloadTesting(
+    speedTest.startTesting(
         onDone: (TestResult download, TestResult upload) {
             // TODO: Change UI
         },
@@ -43,7 +43,7 @@ You can also configure your test server URL
 
   final speedTest = FlutterInternetSpeedTest();
 
-  speedTest.startDownloadTesting(
+  speedTest.startTesting(
      onDone: (TestResult download, TestResult upload) {
         // TODO: Change UI
      },
