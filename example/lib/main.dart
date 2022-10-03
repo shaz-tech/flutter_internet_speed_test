@@ -14,15 +14,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final internetSpeedTest = FlutterInternetSpeedTest();
+  final internetSpeedTest =
+      FlutterInternetSpeedTest(); //FlutterInternetSpeedTest()..enableLog();
 
-  bool testInProgress = false;
-  double downloadRate = 0;
-  double uploadRate = 0;
-  String downloadProgress = '0';
-  String uploadProgress = '0';
+  bool _testInProgress = false;
+  double _downloadRate = 0;
+  double _uploadRate = 0;
+  String _downloadProgress = '0';
+  String _uploadProgress = '0';
+  int _downloadCompletionTime = 0;
+  int _uploadCompletionTime = 0;
 
-  String unitText = 'Mb/s';
+  String _unitText = 'Mb/s';
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +48,11 @@ class _MyAppState extends State<MyApp> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('Progress: $downloadProgress%'),
-                  Text('Download Rate: $downloadRate $unitText'),
+                  Text('Progress: $_downloadProgress%'),
+                  Text('Download Rate: $_downloadRate $_unitText'),
+                  if (_downloadCompletionTime > 0)
+                    Text(
+                        'Time taken: ${(_downloadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
                 ],
               ),
               const SizedBox(
@@ -62,64 +68,69 @@ class _MyAppState extends State<MyApp> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('Progress: $uploadProgress%'),
-                  Text('Upload Rate: $uploadRate $unitText'),
+                  Text('Progress: $_uploadProgress%'),
+                  Text('Upload Rate: $_uploadRate $_unitText'),
+                  if (_uploadCompletionTime > 0)
+                    Text(
+                        'Time taken: ${(_uploadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
                 ],
               ),
               const SizedBox(
                 height: 32.0,
               ),
-              if (!testInProgress) ...{
+              if (!_testInProgress) ...{
                 ElevatedButton(
                   child: const Text('Start Testing'),
                   onPressed: () async {
                     reset();
                     final started = await internetSpeedTest.startTesting(
                       onDone: (TestResult download, TestResult upload) {
-                        if (kDebugMode) {
+                        if (internetSpeedTest.isLogEnabled) {
                           print(
                               'the transfer rate ${download.transferRate}, ${upload.transferRate}');
                         }
                         setState(() {
-                          downloadRate = download.transferRate;
-                          unitText =
+                          _downloadRate = download.transferRate;
+                          _unitText =
                               download.unit == SpeedUnit.Kbps ? 'Kb/s' : 'Mb/s';
-                          downloadProgress = '100';
-                          testInProgress = false;
+                          _downloadProgress = '100';
+                          _downloadCompletionTime = download.durationInMillis;
                         });
                         setState(() {
-                          uploadRate = upload.transferRate;
-                          unitText =
+                          _uploadRate = upload.transferRate;
+                          _unitText =
                               upload.unit == SpeedUnit.Kbps ? 'Kb/s' : 'Mb/s';
-                          uploadProgress = '100';
+                          _uploadProgress = '100';
+                          _uploadCompletionTime = upload.durationInMillis;
+                          _testInProgress = false;
                         });
                       },
                       onProgress: (double percent, TestResult data) {
-                        if (kDebugMode) {
+                        if (internetSpeedTest.isLogEnabled) {
                           print(
                               'the transfer rate $data.transferRate, the percent $percent');
                         }
                         setState(() {
-                          unitText =
+                          _unitText =
                               data.unit == SpeedUnit.Kbps ? 'Kb/s' : 'Mb/s';
                           if (data.type == TestType.DOWNLOAD) {
-                            downloadRate = data.transferRate;
-                            downloadProgress = percent.toStringAsFixed(2);
+                            _downloadRate = data.transferRate;
+                            _downloadProgress = percent.toStringAsFixed(2);
                           } else {
-                            uploadRate = data.transferRate;
-                            uploadProgress = percent.toStringAsFixed(2);
+                            _uploadRate = data.transferRate;
+                            _uploadProgress = percent.toStringAsFixed(2);
                           }
                         });
                       },
                       onError: (String errorMessage, String speedTestError) {
-                        if (kDebugMode) {
+                        if (internetSpeedTest.isLogEnabled) {
                           print(
                               'the errorMessage $errorMessage, the speedTestError $speedTestError');
                         }
                         reset();
                       },
                     );
-                    setState(() => testInProgress = started);
+                    setState(() => _testInProgress = started);
                   },
                 )
               } else ...{
@@ -135,12 +146,14 @@ class _MyAppState extends State<MyApp> {
   void reset() {
     setState(() {
       {
-        testInProgress = false;
-        downloadRate = 0;
-        uploadRate = 0;
-        downloadProgress = '0';
-        uploadProgress = '0';
-        unitText = 'Mb/s';
+        _testInProgress = false;
+        _downloadRate = 0;
+        _uploadRate = 0;
+        _downloadProgress = '0';
+        _uploadProgress = '0';
+        _unitText = 'Mb/s';
+        _downloadCompletionTime = 0;
+        _uploadCompletionTime = 0;
       }
     });
   }

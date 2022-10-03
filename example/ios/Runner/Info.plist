@@ -42,8 +42,19 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
+	    <false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
+	    <true/>
+	<key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+    <key>App Transport Security Settings</key>
+        <dict>
+        <key>Allow Arbitrary Loads</key><true/>
+        </dict>
+    <key>NSIncludesSubdomains</key>
+        <true/>
 </dict>
 </plist>

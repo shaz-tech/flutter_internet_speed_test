@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tuple_dart/tuple.dart';
 
@@ -35,6 +36,10 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   int downloadSteps = 0;
   int uploadSteps = 0;
 
+  bool logEnabled = false;
+
+  get isLogEnabled => logEnabled && kDebugMode;
+
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [FlutterInternetSpeedTestPlatform] when
   /// they register themselves.
@@ -61,5 +66,11 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
     required String testServer,
   }) {
     throw UnimplementedError('startUploadTesting() has not been implemented.');
+  }
+
+  Future<void> toggleLog({
+    required bool value,
+  }) {
+    throw UnimplementedError('toggleLog() has not been implemented.');
   }
 }

@@ -20,3 +20,9 @@
 ## 1.0.3
 
 * iOS bug fixes
+
+## 1.0.4
+
+* Added debug enable/disable option
+* Added duration in callback on completion
+* updated plist

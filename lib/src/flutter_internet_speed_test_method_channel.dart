@@ -12,7 +12,7 @@ class MethodChannelFlutterInternetSpeedTest
   final _channel = const MethodChannel('com.shaz.plugin.fist/method');
 
   Future<void> _methodCallHandler(MethodCall call) async {
-    if (kDebugMode) {
+    if (isLogEnabled) {
       print('arguments are ${call.arguments}');
 //    print('arguments type is  ${call.arguments['type']}');
       print('callbacks are $callbacksById');
@@ -25,7 +25,7 @@ class MethodChannelFlutterInternetSpeedTest
             downloadSteps++;
             downloadRate +=
                 int.parse((call.arguments['transferRate'] ~/ 1000).toString());
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('download steps is $downloadSteps}');
               print('download steps is $downloadRate}');
             }
@@ -38,7 +38,7 @@ class MethodChannelFlutterInternetSpeedTest
             downloadRate = 0;
             callbacksById.remove(call.arguments["id"]);
           } else if (call.arguments['type'] == ListenerEnum.ERROR.index) {
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('onError : ${call.arguments["speedTestError"]}');
               print('onError : ${call.arguments["errorMessage"]}');
             }
@@ -50,7 +50,7 @@ class MethodChannelFlutterInternetSpeedTest
             callbacksById.remove(call.arguments["id"]);
           } else if (call.arguments['type'] == ListenerEnum.PROGRESS.index) {
             double rate = (call.arguments['transferRate'] ~/ 1000).toDouble();
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('rate is $rate');
             }
             if (rate != 0) downloadSteps++;
@@ -64,14 +64,14 @@ class MethodChannelFlutterInternetSpeedTest
         } else if (call.arguments["id"] as int ==
             CallbacksEnum.START_UPLOAD_TESTING.index) {
           if (call.arguments['type'] == ListenerEnum.COMPLETE.index) {
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('onComplete : ${call.arguments['transferRate']}');
             }
 
             uploadSteps++;
             uploadRate +=
                 int.parse((call.arguments['transferRate'] ~/ 1000).toString());
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('download steps is $uploadSteps}');
               print('download steps is $uploadRate}');
             }
@@ -84,7 +84,7 @@ class MethodChannelFlutterInternetSpeedTest
             uploadRate = 0;
             callbacksById.remove(call.arguments["id"]);
           } else if (call.arguments['type'] == ListenerEnum.ERROR.index) {
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('onError : ${call.arguments["speedTestError"]}');
               print('onError : ${call.arguments["errorMessage"]}');
             }
@@ -93,7 +93,7 @@ class MethodChannelFlutterInternetSpeedTest
                 call.arguments['speedTestError']);
           } else if (call.arguments['type'] == ListenerEnum.PROGRESS.index) {
             double rate = (call.arguments['transferRate'] ~/ 1000).toDouble();
-            if (kDebugMode) {
+            if (isLogEnabled) {
               print('rate is $rate');
             }
             if (rate != 0) uploadSteps++;
@@ -108,7 +108,7 @@ class MethodChannelFlutterInternetSpeedTest
 //        callbacksById[call.arguments["id"]](call.arguments["args"]);
         break;
       default:
-        if (kDebugMode) {
+        if (isLogEnabled) {
           print(
               'TestFairy: Ignoring invoke from native. This normally shouldn\'t happen.');
         }
@@ -125,7 +125,7 @@ class MethodChannelFlutterInternetSpeedTest
       int fileSize = 200000}) async {
     _channel.setMethodCallHandler(_methodCallHandler);
     int currentListenerId = callbacksEnum.index;
-    if (kDebugMode) {
+    if (isLogEnabled) {
       print('test $currentListenerId');
     }
     callbacksById[currentListenerId] = callback;
@@ -142,6 +142,15 @@ class MethodChannelFlutterInternetSpeedTest
       _channel.invokeMethod("cancelListening", currentListenerId);
       callbacksById.remove(currentListenerId);
     };
+  }
+
+  Future<void> _toggleLog(bool value) async {
+    await _channel.invokeMethod(
+      "toggleLog",
+      {
+        'value': value,
+      },
+    );
   }
 
   @override
@@ -166,5 +175,11 @@ class MethodChannelFlutterInternetSpeedTest
     return await _startListening(Tuple3(onError, onProgress, onDone),
         CallbacksEnum.START_UPLOAD_TESTING, testServer,
         fileSize: fileSize);
+  }
+
+  @override
+  Future<void> toggleLog({required bool value}) async {
+    logEnabled = value;
+    await _toggleLog(logEnabled);
   }
 }

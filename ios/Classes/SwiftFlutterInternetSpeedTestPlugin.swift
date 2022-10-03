@@ -1,14 +1,14 @@
 import Flutter
 import UIKit
 
-
-
 public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
     
     var callbackById: [Int: () -> ()] = [:]
     
     let speedTest = SpeedTest()
     static var channel: FlutterMethodChannel!
+
+    private let logger = Logger()
     
     public static func register(with registrar: FlutterPluginRegistrar) {
          channel = FlutterMethodChannel(name: "com.shaz.plugin.fist/method", binaryMessenger: registrar.messenger())
@@ -24,7 +24,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
         if let fileSizeArgument = argsMap["fileSize"] as? Int {
             fileSize = fileSizeArgument
         }
-        print("file is of size \(fileSize) Bytes")
+        logger.printLog(message: "file is of size \(fileSize) Bytes")
         switch args {
         case 0:
             startListening(args: args, flutterResult: result, methodName: "startDownloadTesting", testServer: argsMap["testServer"] as! String, fileSize: fileSize)
@@ -36,18 +36,26 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
             break
         }
     }
+
+    private func toggleLog(result: FlutterResult, arguments: Any?) {
+            let argsMap = arguments as! [String: Any]
+            if(argsMap["value"] != nil){
+                let logValue = argsMap["value"] as! Bool
+                logger.enabled = logValue
+            }
+    }
     
     func startListening(args: Any, flutterResult: FlutterResult, methodName:String, testServer: String, fileSize: Int) {
-        print("Method name is \(methodName)")
+        logger.printLog(message: "Method name is \(methodName)")
         let currentListenerId = args as! Int
-        print("id is \(currentListenerId)")
+        logger.printLog(message: "id is \(currentListenerId)")
 
         let fun = {
             if (self.callbackById.contains(where: { (key, _) -> Bool in
-                print("does contain key \(key == currentListenerId)")
+                self.logger.printLog(message: "does contain key \(key == currentListenerId)")
                 return key == currentListenerId
             })) {
-                print("inside if")
+                self.logger.printLog(message: "inside if")
                 switch methodName {
                 case "startDownloadTesting" :
                     self.speedTest.runDownloadTest(for: URL(string: testServer)!, size: fileSize, timeout: 20000, current: { (currentSpeed) in
@@ -71,7 +79,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
                                         SwiftInternetSpeedTestPlugin.channel.invokeMethod("callListener", arguments: argsMap)
                                     }
                                 case .error(let error):
-                                    print("Error is \(error.localizedDescription)")
+                                    self.logger.printLog(message: "Error is \(error.localizedDescription)")
                                     var argsMap: [String: Any] = [:]
                                     argsMap["id"] = currentListenerId
                                     argsMap["speedTestError"] = error.localizedDescription
@@ -83,7 +91,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
                             })
                             break
 //                        case .error(let error):
-//                            print("Error get url  is \(error.localizedDescription)")
+//                            logger.printLog(message: "Error get url  is \(error.localizedDescription)")
 //                            var argsMap: [String: Any] = [:]
 //                            argsMap["id"] = currentListenerId
 //                            argsMap["speedTestError"] = error.localizedDescription
@@ -120,7 +128,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
                                                        }
                                                    case .error(let error):
                                                     
-                                                       print("Error is \(error.localizedDescription)")
+                                                       self.logger.printLog(message: "Error is \(error.localizedDescription)")
                                                        
                                                        var argsMap: [String: Any] = [:]
                                                        argsMap["id"] = currentListenerId
@@ -154,192 +162,23 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-            if (call.method == "getPlatformVersion") {
-                result("iOS " + UIDevice.current.systemVersion)
-            } else if (call.method == "startListening") {
+            if (call.method == "startListening") {
                 mapToCall(result: result, arguments: call.arguments)
             } else if (call.method == "cancelListening") {
-//                cancelListening(arguments: call.arguments, result: result)
+                //cancelListening(arguments: call.arguments, result: result)
+            } else if (call.method == "toggleLog") {
+                toggleLog(result: result, arguments: call.arguments)
             }
     }
-    
-    
-    
-//
-//
-//    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-//
-//        if (call.method == "getPlatformVersion") {
-//            result("iOS " + UIDevice.current.systemVersion)
-//        } else if (call.method == "startListening") {
-//            mapToCall(result: result, arguments: call.arguments)
-//        } else if (call.method == "cancelListening") {
-//            cancelListening(arguments: call.arguments, result: result)
-//        }
-//        else if (call.method == "getAllImages") {
-//
-//            DispatchQueue.main.async {
-//
-//                let imgManager = PHImageManager.default()
-//                let requestOptions = PHImageRequestOptions()
-//                requestOptions.isSynchronous = true
-//                let fetchOptions = PHFetchOptions()
-//                fetchOptions.sortDescriptors = [NSSortDescriptor(key:"creationDate", ascending: true)]
-//
-//                let fetchResult = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: fetchOptions)
-//                var allImages = [String]()
-//
-//                var totalIteration = 0
-//                print("fetchResult.count : \(fetchResult.count)")
-//
-//                var savedLocalIdentifiers = [String]()
-//
-//                for index in 0..<fetchResult.count
-//                {
-//                    let asset = fetchResult.object(at: index) as PHAsset
-//                    let localIdentifier = asset.localIdentifier
-//                    savedLocalIdentifiers.append(localIdentifier)
-//
-//                    imgManager.requestImage(for: asset, targetSize: CGSize(width: 512.0, height: 512.0), contentMode: PHImageContentMode.aspectFit, options: PHImageRequestOptions(), resultHandler:{(image, info) in
-//
-//                        if image != nil {
-//                            var imageData: Data?
-//                            if let cgImage = image!.cgImage, cgImage.renderingIntent == .defaultIntent {
-//                                imageData = image!.jpegData(compressionQuality: 0.8)
-//                            }
-//                            else {
-//                                imageData = image!.pngData()
-//                            }
-//                            let guid = ProcessInfo.processInfo.globallyUniqueString;
-//                            let tmpFile = String(format: "image_picker_%@.jpg", guid);
-//                            let tmpDirectory = NSTemporaryDirectory();
-//                            let tmpPath = (tmpDirectory as NSString).appendingPathComponent(tmpFile);
-//                            if(FileManager.default.createFile(atPath: tmpPath, contents: imageData, attributes: [:])) {
-//                                allImages.append(tmpPath)
-//                            }
-//                        }
-//                        totalIteration += 1
-//                        if totalIteration == (fetchResult.count) {
-//                            result(allImages)
-//                        }
-//                    })
-//                }
-//            }
-//        } else if (call.method == "getAlbums") {
-//            DispatchQueue.main.async {
-//                var album:[PhoneAlbum] = [PhoneAlbum]()
-//
-//                let phResult = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .any, options: nil)
-//                print("albums counts \(phResult.count)")
-//
-//                phResult.enumerateObjects({ (collection, _, _) in
-//
-//                    print("hasAssets \(collection.hasAssets())")
-//                    print("photos count \(collection.photosCount)")
-//
-//                    if (collection.hasAssets()) {
-//                        let image = collection.getCoverImgWithSize(CGRect())
-//                        if image != nil {
-//                            var imageData: Data?
-//                            if let cgImage = image!.cgImage, cgImage.renderingIntent == .defaultIntent {
-//                                imageData = image!.jpegData(compressionQuality: 0.8)
-//                            }
-//                            else {
-//                                imageData = image!.pngData()
-//                            }
-//                            let guid = ProcessInfo.processInfo.globallyUniqueString;
-//                            let tmpFile = String(format: "image_picker_%@.jpg", guid);
-//                            let tmpDirectory = NSTemporaryDirectory();
-//                            let tmpPath = (tmpDirectory as NSString).appendingPathComponent(tmpFile);
-//                            if(FileManager.default.createFile(atPath: tmpPath, contents: imageData, attributes: [:])) {
-//                                album.append(PhoneAlbum(id: collection.localIdentifier, name: collection.localizedTitle ?? "", coverUri: tmpPath, photosCount: collection.photosCount))
-//                            }
-//                        }
-//                    }
-//                })
-//                album.forEach { (phoneAlbum) in
-//                    var string = "[ "
-//                    album.forEach { (phoneAlbum) in
-//                        string += phoneAlbum.toJson()
-//                        if (album.firstIndex(where: {$0 === phoneAlbum}) != album.count - 1) {
-//                            string += ", "
-//                        }
-//                    }
-//                    string += "]"
-//                    result(string)
-//                }
-//            }
-//        } else if (call.method == "getPhotosOfAlbum") {
-//            DispatchQueue.main.async {
-//                var album:[PhonePhoto] = [PhonePhoto]()
-//
-//                let phResult = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .any, options: nil)
-//                print("albums counts \(phResult.count)")
-//
-//
-//
-//                DispatchQueue.main.async {
-//                    let fetchOptions = PHFetchOptions()
-//                    fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
-//                    if let collection = collection {
-//                        self.photos = PHAsset.fetchAssets(in: collection, options: fetchOptions)
-//                    } else {
-//                        self.photos = PHAsset.fetchAssets(with: fetchOptions)
-//                    }
-//                    self.collectionView.reloadData()
-//                }
-//
-//
-//                phResult.enumerateObjects({ (collection, _, _) in
-//
-//                    if (collection.hasAssets()) {
-//                        let image = collection.getCoverImgWithSize(CGRect())
-//                        if image != nil {
-//                            var imageData: Data?
-//                            if let cgImage = image!.cgImage, cgImage.renderingIntent == .defaultIntent {
-//                                imageData = image!.jpegData(compressionQuality: 0.8)
-//                            }
-//                            else {
-//                                imageData = image!.pngData()
-//                            }
-//                            let guid = ProcessInfo.processInfo.globallyUniqueString;
-//                            let tmpFile = String(format: "image_picker_%@.jpg", guid);
-//                            let tmpDirectory = NSTemporaryDirectory();
-//                            let tmpPath = (tmpDirectory as NSString).appendingPathComponent(tmpFile);
-//                            if(FileManager.default.createFile(atPath: tmpPath, contents: imageData, attributes: [:])) {
-//                                album.append(PhoneAlbum(id: collection.localIdentifier, name: collection.localizedTitle ?? "", coverUri: tmpPath, photosCount: collection.photosCount))
-//                            }
-//                        }
-//                    }
-//                })
-//                album.forEach { (phoneAlbum) in
-//                    var string = "[ "
-//                    album.forEach { (phoneAlbum) in
-//                        string += phoneAlbum.toJson()
-//                        if (album.firstIndex(where: {$0 === phoneAlbum}) != album.count - 1) {
-//                            string += ", "
-//                        }
-//                    }
-//                    string += "]"
-//                    result(string)
-//                }
-//            }
-//        }
-//    }
-//
-//    private func fetchImagesFromGallery(collection: PHAssetCollection?) {
-//        //        DispatchQueue.main.async {
-//        //            let fetchOptions = PHFetchOptions()
-//        //            fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
-//        //            if let collection = collection {
-//        //                self.photos = PHAsset.fetchAssets(in: collection, options: fetchOptions)
-//        //            } else {
-//        //                self.photos = PHAsset.fetchAssets(with: fetchOptions)
-//        //            }
-//        //            self.collectionView.reloadData()
-//        //        }
-//    }
-//
-    
+
+    class Logger{
+        var enabled = false
+
+        func printLog(message: String){
+            if(enabled){
+               print(message)
+            }
+        }
+    }
     
 }

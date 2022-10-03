@@ -34,14 +34,20 @@ class FlutterInternetSpeedTest {
       return false;
     }
     _isTestInProgress = true;
+    final startDownloadTimeStamp = DateTime.now().millisecondsSinceEpoch;
     FlutterInternetSpeedTestPlatform.instance.startDownloadTesting(
       onDone: (double transferRate, SpeedUnit unit) {
-        final downloadResult =
-            TestResult(TestType.DOWNLOAD, transferRate, unit);
+        final downloadDuration =
+            DateTime.now().millisecondsSinceEpoch - startDownloadTimeStamp;
+        final downloadResult = TestResult(TestType.DOWNLOAD, transferRate, unit,
+            durationInMillis: downloadDuration);
+        final startUploadTimeStamp = DateTime.now().millisecondsSinceEpoch;
         FlutterInternetSpeedTestPlatform.instance.startUploadTesting(
           onDone: (double transferRate, SpeedUnit unit) {
-            final uploadResult =
-                TestResult(TestType.UPLOAD, transferRate, unit);
+            final uploadDuration =
+                DateTime.now().millisecondsSinceEpoch - startUploadTimeStamp;
+            final uploadResult = TestResult(TestType.UPLOAD, transferRate, unit,
+                durationInMillis: uploadDuration);
             onDone(downloadResult, uploadResult);
             _isTestInProgress = false;
           },
@@ -79,4 +85,14 @@ class FlutterInternetSpeedTest {
     return connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi;
   }
+
+  void enableLog() {
+    FlutterInternetSpeedTestPlatform.instance.toggleLog(value: true);
+  }
+
+  void disableLog() {
+    FlutterInternetSpeedTestPlatform.instance.toggleLog(value: false);
+  }
+
+  bool get isLogEnabled => FlutterInternetSpeedTestPlatform.instance.logEnabled;
 }
