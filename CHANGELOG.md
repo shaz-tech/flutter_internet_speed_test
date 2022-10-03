@@ -16,3 +16,7 @@
 * Added method to check isTestInProgress
 * Made FlutterInternetSpeedTest singleton to run single test at a time
 * No tuple dependency
+
+## 1.0.3
+
+* iOS bug fixes
