@@ -98,11 +98,16 @@ You can also configure your test server URL
 ```
 
 If you don't provide a customized server URL we'll be using this URL for downloading as per the availability
+
 1.https://fast.com/
+
 2.http://speedtest.ftp.otenet.gr/files/test1Mb.db
 
+
 If you don't provide a customized server URL we'll be using this URL for uploading as per the availability
+
 1.https://fast.com/
+
 2.http://speedtest.ftp.otenet.gr/
 
 ### Platforms
