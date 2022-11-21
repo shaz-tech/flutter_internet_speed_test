@@ -1,5 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
+import 'package:flutter_internet_speed_test/src/models/server_selection_response.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
+import 'package:flutter_internet_speed_test/src/speed_test_utils.dart';
 import 'package:tuple_dart/tuple.dart';
 
 import 'callbacks_enum.dart';
@@ -181,5 +185,33 @@ class MethodChannelFlutterInternetSpeedTest
   Future<void> toggleLog({required bool value}) async {
     logEnabled = value;
     await _toggleLog(logEnabled);
+  }
+
+  @override
+  Future<ServerSelectionResponse?> getDefaultServer() async {
+    try {
+      if (await isInternetAvailable()) {
+        const tag = 'token:"';
+        var tokenUrl = Uri.parse('https://fast.com/app-a32983.js');
+        var tokenResponse = await http.get(tokenUrl);
+        if (tokenResponse.body.contains(tag)) {
+          int start = tokenResponse.body.lastIndexOf(tag) + tag.length;
+          String token = tokenResponse.body.substring(start, start + 32);
+          var serverUrl = Uri.parse(
+              'https://api.fast.com/netflix/speedtest/v2?https=true&token=$token&urlCount=5');
+          var serverResponse = await http.get(serverUrl);
+          var serverSelectionResponse = ServerSelectionResponse.fromJson(
+              json.decode(serverResponse.body));
+          if (serverSelectionResponse.targets?.isNotEmpty == true) {
+            return serverSelectionResponse;
+          }
+        }
+      }
+    } catch (e) {
+      if (logEnabled) {
+        print(e);
+      }
+    }
+    return null;
   }
 }

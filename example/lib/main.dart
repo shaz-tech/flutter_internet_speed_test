@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_internet_speed_test/flutter_internet_speed_test.dart';
 
@@ -24,6 +23,11 @@ class _MyAppState extends State<MyApp> {
   String _uploadProgress = '0';
   int _downloadCompletionTime = 0;
   int _uploadCompletionTime = 0;
+  bool _isServerSelectionInProgress = false;
+
+  String? _ip;
+  String? _asn;
+  String? _isp;
 
   String _unitText = 'Mb/s';
 
@@ -78,13 +82,22 @@ class _MyAppState extends State<MyApp> {
               const SizedBox(
                 height: 32.0,
               ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(_isServerSelectionInProgress
+                    ? 'Selecting Server...'
+                    : 'IP: ${_ip ?? '--'} | ASP: ${_asn ?? '--'} | ISP: ${_isp ?? '--'}'),
+              ),
               if (!_testInProgress) ...{
                 ElevatedButton(
                   child: const Text('Start Testing'),
                   onPressed: () async {
                     reset();
-                    final started = await internetSpeedTest.startTesting(
-                      onDone: (TestResult download, TestResult upload) {
+                    await internetSpeedTest.startTesting(
+                      onStarted: () {
+                        setState(() => _testInProgress = true);
+                      },
+                      onCompleted: (TestResult download, TestResult upload) {
                         if (internetSpeedTest.isLogEnabled) {
                           print(
                               'the transfer rate ${download.transferRate}, ${upload.transferRate}');
@@ -129,8 +142,36 @@ class _MyAppState extends State<MyApp> {
                         }
                         reset();
                       },
+                      onDefaultServerSelectionInProgress: () {
+                        setState(() {
+                          _isServerSelectionInProgress = true;
+                        });
+                      },
+                      onDefaultServerSelectionDone: (Client? client) {
+                        setState(() {
+                          _isServerSelectionInProgress = false;
+                          _ip = client?.ip;
+                          _asn = client?.asn;
+                          _isp = client?.isp;
+                        });
+                      },
+                      onDownloadComplete: (TestResult data) {
+                        setState(() {
+                          _downloadRate = data.transferRate;
+                          _unitText =
+                              data.unit == SpeedUnit.Kbps ? 'Kb/s' : 'Mb/s';
+                          _downloadCompletionTime = data.durationInMillis;
+                        });
+                      },
+                      onUploadComplete: (TestResult data) {
+                        setState(() {
+                          _uploadRate = data.transferRate;
+                          _unitText =
+                              data.unit == SpeedUnit.Kbps ? 'Kb/s' : 'Mb/s';
+                          _uploadCompletionTime = data.durationInMillis;
+                        });
+                      },
                     );
-                    setState(() => _testInProgress = started);
                   },
                 )
               } else ...{

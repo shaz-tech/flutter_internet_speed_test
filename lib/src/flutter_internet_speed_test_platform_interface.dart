@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_internet_speed_test/src/models/server_selection_response.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tuple_dart/tuple.dart';
 
@@ -72,5 +73,9 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
     required bool value,
   }) {
     throw UnimplementedError('toggleLog() has not been implemented.');
+  }
+
+  Future<ServerSelectionResponse?> getDefaultServer() {
+    throw UnimplementedError('getDefaultServer() has not been implemented.');
   }
 }
