@@ -26,3 +26,8 @@
 * Added debug enable/disable option
 * Added duration in callback on completion
 * updated plist
+
+## 1.1.0
+
+* Added fast.com and speedtest support
+* Added multiple useful callbacks
