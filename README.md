@@ -2,6 +2,9 @@
 
 A Flutter plugin to test internet download and upload speed.
 
+#### Used servers: 
+Fast.com by Netflix (default), Speed Test by Ookla
+
 ## Get started
 
 ### Add dependency
@@ -37,11 +40,11 @@ dependencies:
         },
         onDefaultServerSelectionInProgress: () {
           // TODO
-          //Only when you use fast API
+          //Only when you use useFastApi parameter as true(default)
         },
         onDefaultServerSelectionDone: (Client? client) {
           // TODO
-          //Only when you use fast API
+          //Only when you use useFastApi parameter as true(default)
         },
         onDownloadComplete: (TestResult data) {
           // TODO
@@ -81,11 +84,11 @@ You can also configure your test server URL
       },
       onDefaultServerSelectionInProgress: () {
         // TODO
-        //Only when you use fast API
+        //Only when you use useFastApi parameter as true(default)
       },
       onDefaultServerSelectionDone: (Client? client) {
         // TODO
-        //Only when you use fast API
+        ///Only when you use useFastApi parameter as true(default)
       },
       onDownloadComplete: (TestResult data) {
         // TODO
