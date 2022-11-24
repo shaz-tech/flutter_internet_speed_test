@@ -11,7 +11,7 @@ Fast.com by Netflix (default), Speed Test by Ookla
 
 ```yaml
 dependencies:
-  flutter_internet_speed_test: ^1.1.0
+  flutter_internet_speed_test: ^lastest_version
 ```
 
 ### Screenshots
