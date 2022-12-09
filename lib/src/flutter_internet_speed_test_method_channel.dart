@@ -126,7 +126,7 @@ class MethodChannelFlutterInternetSpeedTest
       CallbacksEnum callbacksEnum,
       String testServer,
       {Map<String, dynamic>? args,
-      int fileSize = 200000}) async {
+      int fileSize = 10000000}) async {
     _channel.setMethodCallHandler(_methodCallHandler);
     int currentListenerId = callbacksEnum.index;
     if (isLogEnabled) {

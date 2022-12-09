@@ -9,7 +9,7 @@ typedef DefaultCallback = void Function();
 typedef ResultCallback = void Function(TestResult download, TestResult upload);
 typedef TestProgressCallback = void Function(double percent, TestResult data);
 typedef ResultCompletionCallback = void Function(TestResult data);
-typedef DefaultServerSelectionCallback = void Function(Client? clinet);
+typedef DefaultServerSelectionCallback = void Function(Client? client);
 
 class FlutterInternetSpeedTest {
   static const _defaultDownloadTestServer =
@@ -28,30 +28,35 @@ class FlutterInternetSpeedTest {
   bool isTestInProgress() => _isTestInProgress;
 
   Future<bool> startTesting({
-    required DefaultCallback? onStarted,
     required ResultCallback onCompleted,
-    required ResultCompletionCallback? onDownloadComplete,
-    required ResultCompletionCallback? onUploadComplete,
-    required TestProgressCallback? onProgress,
-    required DefaultCallback? onDefaultServerSelectionInProgress,
-    required DefaultServerSelectionCallback? onDefaultServerSelectionDone,
-    required ErrorCallback? onError,
+    DefaultCallback? onStarted,
+    ResultCompletionCallback? onDownloadComplete,
+    ResultCompletionCallback? onUploadComplete,
+    TestProgressCallback? onProgress,
+    DefaultCallback? onDefaultServerSelectionInProgress,
+    DefaultServerSelectionCallback? onDefaultServerSelectionDone,
+    ErrorCallback? onError,
     String? downloadTestServer,
     String? uploadTestServer,
-    int fileSize = 200000,
+    int fileSizeInBytes = 10000000, //10 MB
     bool useFastApi = true,
   }) async {
     if (_isTestInProgress) {
       return false;
     }
     if (await isInternetAvailable() == false) {
+      if (onError != null) {
+        onError('No internet connection', 'No internet connection');
+      }
       return false;
     }
 
+    if (fileSizeInBytes < 10000000) fileSizeInBytes = 10000000; //10 MB
     _isTestInProgress = true;
     if (onStarted != null) onStarted();
 
-    if ((downloadTestServer == null || uploadTestServer == null) && useFastApi) {
+    if ((downloadTestServer == null || uploadTestServer == null) &&
+        useFastApi) {
       if (onDefaultServerSelectionInProgress != null) {
         onDefaultServerSelectionInProgress();
       }
@@ -105,7 +110,7 @@ class FlutterInternetSpeedTest {
             if (onError != null) onError(errorMessage, speedTestError);
             _isTestInProgress = false;
           },
-          fileSize: fileSize,
+          fileSize: fileSizeInBytes,
           testServer: uploadTestServer!,
         );
       },
@@ -118,7 +123,7 @@ class FlutterInternetSpeedTest {
         if (onError != null) onError(errorMessage, speedTestError);
         _isTestInProgress = false;
       },
-      fileSize: fileSize,
+      fileSize: fileSizeInBytes,
       testServer: downloadTestServer,
     );
 

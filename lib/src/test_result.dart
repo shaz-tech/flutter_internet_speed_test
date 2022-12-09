@@ -6,6 +6,7 @@ class TestResult {
   final SpeedUnit unit;
   final int durationInMillis; //Duration to complete
 
-  TestResult(this.type, this.transferRate, this.unit, {int durationInMillis = 0})
-      : this.durationInMillis = durationInMillis;
+  TestResult(this.type, this.transferRate, this.unit,
+      {int durationInMillis = 0})
+      : durationInMillis = durationInMillis - (durationInMillis % 1000);
 }

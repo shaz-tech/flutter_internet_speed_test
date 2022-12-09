@@ -31,3 +31,8 @@
 
 * Added fast.com and speedtest support
 * Added multiple useful callbacks
+
+## 1.2.0
+
+* Bug fixes related to upload test
+* Optimized response

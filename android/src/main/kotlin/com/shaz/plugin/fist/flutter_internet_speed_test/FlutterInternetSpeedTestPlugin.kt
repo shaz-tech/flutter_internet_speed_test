@@ -2,22 +2,24 @@ package com.shaz.plugin.fist.flutter_internet_speed_test
 
 import android.app.Activity
 import android.content.Context
-import androidx.annotation.NonNull
 import fr.bmartel.speedtest.SpeedTestReport
 import fr.bmartel.speedtest.SpeedTestSocket
 import fr.bmartel.speedtest.inter.IRepeatListener
 import fr.bmartel.speedtest.inter.ISpeedTestListener
 import fr.bmartel.speedtest.model.SpeedTestError
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 /** FlutterInternetSpeedTestPlugin */
-public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+    private val defaultFileSizeInBytes: Int = 10000000 //10 MB
+    private val defaultTestTimeoutInMillis: Int = 20000
+    private val defaultResponseDelayInMillis: Int = 300
 
     private var result: Result? = null
     private var speedTestSocket: SpeedTestSocket = SpeedTestSocket()
@@ -28,7 +30,7 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
 
     private val logger = Logger()
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = flutterPluginBinding.applicationContext
         methodChannel =
             MethodChannel(flutterPluginBinding.binaryMessenger, "com.shaz.plugin.fist/method")
@@ -37,15 +39,15 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         this.result = result
-        when {
-            call.method == "startListening" -> mapToCall(result, call.arguments)
-            call.method == "cancelListening" -> cancelListening(call.arguments, result)
-            call.method == "toggleLog" -> toggleLog(result, call.arguments)
+        when (call.method) {
+            "startListening" -> mapToCall(result, call.arguments)
+            "cancelListening" -> cancelListening(call.arguments, result)
+            "toggleLog" -> toggleLog(call.arguments)
             else -> result.notImplemented()
         }
     }
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         activity = null
         applicationContext = null
         methodChannel.setMethodCallHandler(null)
@@ -70,19 +72,23 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
     private fun mapToCall(result: Result, arguments: Any?) {
         val argsMap = arguments as Map<*, *>
 
+        val fileSize =
+            if (argsMap.containsKey("fileSize")) argsMap["fileSize"] as Int else defaultFileSizeInBytes
         when (val args = argsMap["id"] as Int) {
             CallbacksEnum.START_DOWNLOAD_TESTING.ordinal -> startListening(args,
                 result,
                 "startDownloadTesting",
-                argsMap["testServer"] as String)
+                argsMap["testServer"] as String,
+                fileSize)
             CallbacksEnum.START_UPLOAD_TESTING.ordinal -> startListening(args,
                 result,
                 "startUploadTesting",
-                argsMap["testServer"] as String)
+                argsMap["testServer"] as String,
+                fileSize)
         }
     }
 
-    private fun toggleLog(result: Result, arguments: Any?) {
+    private fun toggleLog(arguments: Any?) {
         val argsMap = arguments as Map<*, *>
 
         if (argsMap.containsKey("value")) {
@@ -93,7 +99,13 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
 
     private val callbackById: MutableMap<Int, Runnable> = mutableMapOf()
 
-    fun startListening(args: Any, result: Result, methodName: String, testServer: String) {
+    private fun startListening(
+        args: Any,
+        result: Result,
+        methodName: String,
+        testServer: String,
+        fileSize: Int,
+    ) {
         // Get callback id
         logger.print("test starting")
         val currentListenerId = args as Int
@@ -131,7 +143,7 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
                                     methodChannel.invokeMethod("callListener", argsMap)
                                 }
                             }
-                        }, testServer)
+                        }, testServer, fileSize)
                     }
                     "startUploadTesting" -> {
                         testUploadSpeed(object : TestListener {
@@ -160,7 +172,7 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
                                     methodChannel.invokeMethod("callListener", argsMap)
                                 }
                             }
-                        }, testServer)
+                        }, testServer, fileSize)
                     }
 
                 }
@@ -175,7 +187,7 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
         result.success(null)
     }
 
-    private fun testUploadSpeed(testListener: TestListener, testServer: String) {
+    private fun testUploadSpeed(testListener: TestListener, testServer: String, fileSize: Int) {
         // add a listener to wait for speedtest completion and progress
         logger.print("Testing Testing")
         speedTestSocket.addSpeedTestListener(object : ISpeedTestListener {
@@ -200,28 +212,32 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
 //                testListener.onProgress(percent.toDouble(), report.transferRateBit.toDouble())
             }
         })
-//        speedTestSocket.startFixedUpload("http://ipv4.ikoula.testdebit.info/", 10000000, 10000)
-        speedTestSocket.startUploadRepeat(testServer, 20000, 500, 2000, object : IRepeatListener {
-            override fun onCompletion(report: SpeedTestReport) {
-                // called when download/upload is complete
-                logger.print("[COMPLETED] rate in octet/s : " + report.transferRateOctet)
-                logger.print("[COMPLETED] rate in bit/s   : " + report.transferRateBit)
-                testListener.onComplete(report.transferRateBit.toDouble())
-            }
+//        speedTestSocket.startFixedUpload(testServer, 10000000, 20000, 100)
+        speedTestSocket.startUploadRepeat(testServer,
+            defaultTestTimeoutInMillis,
+            defaultResponseDelayInMillis,
+            fileSize,
+            object : IRepeatListener {
+                override fun onCompletion(report: SpeedTestReport) {
+                    // called when download/upload is complete
+                    logger.print("[COMPLETED] rate in octet/s : " + report.transferRateOctet)
+                    logger.print("[COMPLETED] rate in bit/s   : " + report.transferRateBit)
+                    testListener.onComplete(report.transferRateBit.toDouble())
+                }
 
-            override fun onReport(report: SpeedTestReport) {
-                // called to notify download/upload progress
-                logger.print("[PROGRESS] progress : ${report.progressPercent}%")
-                logger.print("[PROGRESS] rate in octet/s : " + report.transferRateOctet)
-                logger.print("[PROGRESS] rate in bit/s   : " + report.transferRateBit)
-                testListener.onProgress(report.progressPercent.toDouble(),
-                    report.transferRateBit.toDouble())
-            }
-        })
+                override fun onReport(report: SpeedTestReport) {
+                    // called to notify download/upload progress
+                    logger.print("[PROGRESS] progress : ${report.progressPercent}%")
+                    logger.print("[PROGRESS] rate in octet/s : " + report.transferRateOctet)
+                    logger.print("[PROGRESS] rate in bit/s   : " + report.transferRateBit)
+                    testListener.onProgress(report.progressPercent.toDouble(),
+                        report.transferRateBit.toDouble())
+                }
+            })
         logger.print("After Testing")
     }
 
-    private fun testDownloadSpeed(testListener: TestListener, testServer: String) {
+    private fun testDownloadSpeed(testListener: TestListener, testServer: String, fileSize: Int) {
         // add a listener to wait for speedtest completion and progress
         logger.print("Testing Testing")
         speedTestSocket.addSpeedTestListener(object : ISpeedTestListener {
@@ -246,11 +262,12 @@ public class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, 
 //                testListener.onProgress(percent.toDouble(), report.transferRateBit.toDouble())
             }
         })
-//        speedTestSocket.startDownloadRepeat("http://ipv4.ikoula.testdebit.info/1M.iso", 10000)
-
+//        speedTestSocket.startFixedDownload(testServer, 20000, 100)
 
         speedTestSocket.startDownloadRepeat(testServer,
-            20000, 500, object : IRepeatListener {
+            defaultTestTimeoutInMillis,
+            defaultResponseDelayInMillis,
+            object : IRepeatListener {
                 override fun onCompletion(report: SpeedTestReport) {
                     // called when download/upload is complete
                     logger.print("[COMPLETED] rate in octet/s : " + report.transferRateOctet)
