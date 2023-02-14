@@ -97,7 +97,7 @@ class FlutterInternetSpeedTest {
       onDone: (double transferRate, SpeedUnit unit) {
         final downloadDuration =
             DateTime.now().millisecondsSinceEpoch - startDownloadTimeStamp;
-        final downloadResult = TestResult(TestType.DOWNLOAD, transferRate, unit,
+        final downloadResult = TestResult(TestType.download, transferRate, unit,
             durationInMillis: downloadDuration);
 
         if (onProgress != null) onProgress(100, downloadResult);
@@ -108,7 +108,7 @@ class FlutterInternetSpeedTest {
           onDone: (double transferRate, SpeedUnit unit) {
             final uploadDuration =
                 DateTime.now().millisecondsSinceEpoch - startUploadTimeStamp;
-            final uploadResult = TestResult(TestType.UPLOAD, transferRate, unit,
+            final uploadResult = TestResult(TestType.upload, transferRate, unit,
                 durationInMillis: uploadDuration);
 
             if (onProgress != null) onProgress(100, uploadResult);
@@ -120,7 +120,7 @@ class FlutterInternetSpeedTest {
           },
           onProgress: (double percent, double transferRate, SpeedUnit unit) {
             final uploadProgressResult =
-                TestResult(TestType.UPLOAD, transferRate, unit);
+                TestResult(TestType.upload, transferRate, unit);
             if (onProgress != null) {
               onProgress(percent, uploadProgressResult);
             }
@@ -141,7 +141,7 @@ class FlutterInternetSpeedTest {
       },
       onProgress: (double percent, double transferRate, SpeedUnit unit) {
         final downloadProgressResult =
-            TestResult(TestType.DOWNLOAD, transferRate, unit);
+            TestResult(TestType.download, transferRate, unit);
         if (onProgress != null) onProgress(percent, downloadProgressResult);
       },
       onError: (String errorMessage, String speedTestError) {

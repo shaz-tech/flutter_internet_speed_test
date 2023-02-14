@@ -1,179 +1,100 @@
 class ServerSelectionResponse {
-  Client? _client;
-  List<Targets>? _targets;
+  late final Client? client;
+  late final List<Targets>? targets;
 
-  ServerSelectionResponse({Client? client, List<Targets>? targets}) {
-    if (client != null) {
-      _client = client;
-    }
-    if (targets != null) {
-      _targets = targets;
-    }
-  }
-
-  Client? get client => _client;
-
-  set client(Client? client) => _client = client;
-
-  List<Targets>? get targets => _targets;
-
-  set targets(List<Targets>? targets) => _targets = targets;
+  ServerSelectionResponse({this.client, this.targets});
 
   ServerSelectionResponse.fromJson(Map<String, dynamic> json) {
-    _client = json['client'] != null ? Client.fromJson(json['client']) : null;
+    client = json['client'] != null ? Client.fromJson(json['client']) : null;
+    targets = <Targets>[];
     if (json['targets'] != null) {
-      _targets = <Targets>[];
       json['targets'].forEach((v) {
-        _targets!.add(Targets.fromJson(v));
+        targets!.add(Targets.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    if (_client != null) {
-      data['client'] = _client!.toJson();
+    if (client != null) {
+      data['client'] = client!.toJson();
     }
-    if (_targets != null) {
-      data['targets'] = _targets!.map((v) => v.toJson()).toList();
+    if (targets != null) {
+      data['targets'] = targets!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class Client {
-  String? _ip;
-  String? _asn;
-  String? _isp;
-  Location? _location;
+  late final String? ip;
+  late final String? asn;
+  late final String? isp;
+  late final Location? location;
 
-  Client({String? ip, String? asn, String? isp, Location? location}) {
-    if (ip != null) {
-      _ip = ip;
-    }
-    if (asn != null) {
-      _asn = asn;
-    }
-    if (isp != null) {
-      _isp = isp;
-    }
-    if (location != null) {
-      _location = location;
-    }
-  }
-
-  String? get ip => _ip;
-
-  set ip(String? ip) => _ip = ip;
-
-  String? get asn => _asn;
-
-  set asn(String? asn) => _asn = asn;
-
-  String? get isp => _isp;
-
-  set isp(String? isp) => _isp = isp;
-
-  Location? get location => _location;
-
-  set location(Location? location) => _location = location;
+  Client({this.ip, this.asn, this.isp, this.location});
 
   Client.fromJson(Map<String, dynamic> json) {
-    _ip = json['ip'];
-    _asn = json['asn'];
-    _isp = json['isp'];
-    _location =
+    ip = json['ip'];
+    asn = json['asn'];
+    isp = json['isp'];
+    location =
         json['location'] != null ? Location.fromJson(json['location']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['ip'] = _ip;
-    data['asn'] = _asn;
-    data['isp'] = _isp;
-    if (_location != null) {
-      data['location'] = _location!.toJson();
+    data['ip'] = ip;
+    data['asn'] = asn;
+    data['isp'] = isp;
+    if (location != null) {
+      data['location'] = location!.toJson();
     }
     return data;
   }
 }
 
 class Location {
-  String? _city;
-  String? _country;
+  late final String? city;
+  late final String? country;
 
-  Location({String? city, String? country}) {
-    if (city != null) {
-      _city = city;
-    }
-    if (country != null) {
-      _country = country;
-    }
-  }
-
-  String? get city => _city;
-
-  set city(String? city) => _city = city;
-
-  String? get country => _country;
-
-  set country(String? country) => _country = country;
+  Location({this.city, this.country});
 
   Location.fromJson(Map<String, dynamic> json) {
-    _city = json['city'];
-    _country = json['country'];
+    city = json['city'];
+    country = json['country'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['city'] = _city;
-    data['country'] = _country;
+    data['city'] = city;
+    data['country'] = country;
     return data;
   }
 }
 
 class Targets {
-  String? _name;
-  String? _url;
-  Location? _location;
+  late final String? name;
+  late final String? url;
+  late final Location? location;
 
-  Targets({String? name, String? url, Location? location}) {
-    if (name != null) {
-      _name = name;
-    }
-    if (url != null) {
-      _url = url;
-    }
-    if (location != null) {
-      _location = location;
-    }
-  }
+  Targets({this.name, this.url, this.location});
 
-  String? get name => _name;
-
-  set name(String? name) => _name = name;
-
-  String? get url => _url;
-
-  set url(String? url) => _url = url;
-
-  Location? get location => _location;
-
-  set location(Location? location) => _location = location;
+  set location(Location? location) => location = location;
 
   Targets.fromJson(Map<String, dynamic> json) {
-    _name = json['name'];
-    _url = json['url'];
-    _location =
+    name = json['name'];
+    url = json['url'];
+    location =
         json['location'] != null ? Location.fromJson(json['location']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = _name;
-    data['url'] = _url;
-    if (_location != null) {
-      data['location'] = _location!.toJson();
+    data['name'] = name;
+    data['url'] = url;
+    if (location != null) {
+      data['location'] = location!.toJson();
     }
     return data;
   }
