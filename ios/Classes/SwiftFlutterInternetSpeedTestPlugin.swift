@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 
 public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
-    let DEFAULT_FILE_SIZE = 10000000
+    let DEFAULT_FILE_SIZE = 10485760
     let DEFAULT_TEST_TIMEOUT = 20000
     
     var callbackById: [Int: () -> ()] = [:]
@@ -47,6 +47,11 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    private func cancelTasks(result: FlutterResult, arguments: Any?) {
+        self.speedTest.cancelTasks()
+        result(true)
+    }
+    
     func startListening(args: Any, flutterResult: FlutterResult, methodName:String, testServer: String, fileSize: Int) {
         logger.printLog(message: "Method name is \(methodName)")
         let currentListenerId = args as! Int
@@ -60,7 +65,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
                 self.logger.printLog(message: "inside if")
                 switch methodName {
                 case "startDownloadTesting" :
-                    self.speedTest.runDownloadTest(for: URL(string: testServer)!, size: fileSize, timeout: DEFAULT_TEST_TIMEOUT, current: { (currentSpeed) in
+                    self.speedTest.runDownloadTest(for: URL(string: testServer)!, size: fileSize, timeout: TimeInterval(self.DEFAULT_TEST_TIMEOUT), current: { (currentSpeed) in
                         var argsMap: [String: Any] = [:]
                         argsMap["id"] = currentListenerId
                         argsMap["transferRate"] = self.getSpeedInBytes(speed: currentSpeed)
@@ -105,7 +110,7 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
                     
                     //                    break
                 case "startUploadTesting":
-                    self.speedTest.runUploadTest(for: URL(string: testServer)!, size: fileSize, timeout: DEFAULT_TEST_TIMEOUT, current: { (currentSpeed) in
+                    self.speedTest.runUploadTest(for: URL(string: testServer)!, size: fileSize, timeout: TimeInterval(self.DEFAULT_TEST_TIMEOUT), current: { (currentSpeed) in
                         var argsMap: [String: Any] = [:]
                         argsMap["id"] = currentListenerId
                         argsMap["transferRate"] = self.getSpeedInBytes(speed: currentSpeed)
@@ -170,6 +175,8 @@ public class SwiftInternetSpeedTestPlugin: NSObject, FlutterPlugin {
             //cancelListening(arguments: call.arguments, result: result)
         } else if (call.method == "toggleLog") {
             toggleLog(result: result, arguments: call.arguments)
+        }else if (call.method == "cancelTest") {
+            cancelTasks(result: result, arguments: call.arguments)
         }
     }
     

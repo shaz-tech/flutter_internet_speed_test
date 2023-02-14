@@ -15,6 +15,7 @@ typedef ProgressCallback = void Function(
 );
 typedef ErrorCallback = void Function(
     String errorMessage, String speedTestError);
+typedef CancelCallback = void Function();
 
 abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   /// Constructs a FlutterInternetSpeedTestPlatform.
@@ -30,7 +31,8 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
   /// Defaults to [MethodChannelFlutterInternetSpeedTest].
   static FlutterInternetSpeedTestPlatform get instance => _instance;
 
-  Map<int, Tuple3<ErrorCallback, ProgressCallback, DoneCallback>>
+  Map<int,
+          Tuple4<ErrorCallback, ProgressCallback, DoneCallback, CancelCallback>>
       callbacksById = {};
   int downloadRate = 0;
   int uploadRate = 0;
@@ -53,6 +55,7 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
       {required DoneCallback onDone,
       required ProgressCallback onProgress,
       required ErrorCallback onError,
+      required CancelCallback onCancel,
       required int fileSize,
       required String testServer}) {
     throw UnimplementedError(
@@ -63,6 +66,7 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
     required DoneCallback onDone,
     required ProgressCallback onProgress,
     required ErrorCallback onError,
+    required CancelCallback onCancel,
     required int fileSize,
     required String testServer,
   }) {
@@ -77,5 +81,9 @@ abstract class FlutterInternetSpeedTestPlatform extends PlatformInterface {
 
   Future<ServerSelectionResponse?> getDefaultServer() {
     throw UnimplementedError('getDefaultServer() has not been implemented.');
+  }
+
+  Future<bool> cancelTest() {
+    throw UnimplementedError('cancelTest() has not been implemented.');
   }
 }

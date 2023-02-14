@@ -1,11 +1,3 @@
-//
-//  CustomHostUploadService.swift
-//  SpeedTestLib
-//
-//  Created by dhaurylenka on 2/6/18.
-//  Copyright © 2018 Exadel. All rights reserved.
-//
-
 import Foundation
 
 class CustomHostUploadService: NSObject, SpeedService {
@@ -13,6 +5,8 @@ class CustomHostUploadService: NSObject, SpeedService {
     private var latestDate: Date?
     private var current: ((Speed, Speed) -> ())!
     private var final: ((Result<Speed, NetworkError>) -> ())!
+    
+    private var task: URLSessionTask?
     
     func test(_ url: URL, fileSize: Int, timeout: TimeInterval, current: @escaping (Speed, Speed) -> (), final: @escaping (Result<Speed, NetworkError>) -> ()) {
         self.current = current
@@ -24,9 +18,13 @@ class CustomHostUploadService: NSObject, SpeedService {
                                        "Content-Length": "\(fileSize)",
                                        "Connection": "keep-alive"]
         
-        URLSession(configuration: sessionConfiguration(timeout: timeout / 1000), delegate: self, delegateQueue: OperationQueue.main)
+        task = URLSession(configuration: sessionConfiguration(timeout: timeout / 1000), delegate: self, delegateQueue: OperationQueue.main)
             .uploadTask(with: request, from: Data(count: fileSize))
-            .resume()
+        task?.resume()
+    }
+    
+    func cancelTask() {
+        task?.cancel()
     }
 }
 

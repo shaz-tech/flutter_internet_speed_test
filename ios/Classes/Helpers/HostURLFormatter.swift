@@ -1,11 +1,3 @@
-//
-//  HostURLFormatter.swift
-//  SpeedTestLib
-//
-//  Created by dhaurylenka on 2/6/18.
-//  Copyright © 2018 Exadel. All rights reserved.
-//
-
 import Foundation
 
 class HostURLFormatter {

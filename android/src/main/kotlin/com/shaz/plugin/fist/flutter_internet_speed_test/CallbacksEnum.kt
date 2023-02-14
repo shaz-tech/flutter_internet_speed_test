@@ -8,5 +8,6 @@ enum class CallbacksEnum {
 enum class ListenerEnum {
     COMPLETE,
     ERROR,
-    PROGRESS
+    PROGRESS,
+    CANCEL
 }

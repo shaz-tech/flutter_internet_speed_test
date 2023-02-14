@@ -1,10 +1,3 @@
-//
-//  TestListener.swift
-//  internet_speed_test
-//
-//  Created by Taha Malas on 5/1/20.
-//
-
 import Foundation
 
 protocol TestListener {

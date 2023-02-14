@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_internet_speed_test'
-  s.version          = '1.2.0'
+  s.version          = '1.0.0'
   s.summary          = 'A Flutter plugin to test internet download and upload speed.'
   s.description      = <<-DESC
 A new Flutter plugin project.

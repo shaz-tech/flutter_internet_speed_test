@@ -1,11 +1,3 @@
-//
-//  SpeedTest.swift
-//  SpeedTestLib
-//
-//  Created by dhaurylenka on 2/5/18.
-//  Copyright © 2018 Exadel. All rights reserved.
-//
-
 import Foundation
 
 public enum SpeedTestError: Error {
@@ -94,6 +86,11 @@ public final class SpeedTest {
                         }, final: { result in
                             final(result)
                         })
+    }
+    
+    public func cancelTasks(){
+        downloadService.cancelTask()
+        uploadService.cancelTask()
     }
     
     private func pingAllHosts(hosts: [URL], timeout: TimeInterval, closure: @escaping ([(host: URL, ping: Int)]) -> ()) {

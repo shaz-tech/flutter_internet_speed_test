@@ -4,10 +4,10 @@ class ServerSelectionResponse {
 
   ServerSelectionResponse({Client? client, List<Targets>? targets}) {
     if (client != null) {
-      this._client = client;
+      _client = client;
     }
     if (targets != null) {
-      this._targets = targets;
+      _targets = targets;
     }
   }
 
@@ -20,23 +20,22 @@ class ServerSelectionResponse {
   set targets(List<Targets>? targets) => _targets = targets;
 
   ServerSelectionResponse.fromJson(Map<String, dynamic> json) {
-    _client =
-        json['client'] != null ? new Client.fromJson(json['client']) : null;
+    _client = json['client'] != null ? Client.fromJson(json['client']) : null;
     if (json['targets'] != null) {
       _targets = <Targets>[];
       json['targets'].forEach((v) {
-        _targets!.add(new Targets.fromJson(v));
+        _targets!.add(Targets.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this._client != null) {
-      data['client'] = this._client!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (_client != null) {
+      data['client'] = _client!.toJson();
     }
-    if (this._targets != null) {
-      data['targets'] = this._targets!.map((v) => v.toJson()).toList();
+    if (_targets != null) {
+      data['targets'] = _targets!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -50,16 +49,16 @@ class Client {
 
   Client({String? ip, String? asn, String? isp, Location? location}) {
     if (ip != null) {
-      this._ip = ip;
+      _ip = ip;
     }
     if (asn != null) {
-      this._asn = asn;
+      _asn = asn;
     }
     if (isp != null) {
-      this._isp = isp;
+      _isp = isp;
     }
     if (location != null) {
-      this._location = location;
+      _location = location;
     }
   }
 
@@ -83,18 +82,17 @@ class Client {
     _ip = json['ip'];
     _asn = json['asn'];
     _isp = json['isp'];
-    _location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    _location =
+        json['location'] != null ? Location.fromJson(json['location']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['ip'] = this._ip;
-    data['asn'] = this._asn;
-    data['isp'] = this._isp;
-    if (this._location != null) {
-      data['location'] = this._location!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['ip'] = _ip;
+    data['asn'] = _asn;
+    data['isp'] = _isp;
+    if (_location != null) {
+      data['location'] = _location!.toJson();
     }
     return data;
   }
@@ -106,10 +104,10 @@ class Location {
 
   Location({String? city, String? country}) {
     if (city != null) {
-      this._city = city;
+      _city = city;
     }
     if (country != null) {
-      this._country = country;
+      _country = country;
     }
   }
 
@@ -127,9 +125,9 @@ class Location {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['city'] = this._city;
-    data['country'] = this._country;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['city'] = _city;
+    data['country'] = _country;
     return data;
   }
 }
@@ -141,13 +139,13 @@ class Targets {
 
   Targets({String? name, String? url, Location? location}) {
     if (name != null) {
-      this._name = name;
+      _name = name;
     }
     if (url != null) {
-      this._url = url;
+      _url = url;
     }
     if (location != null) {
-      this._location = location;
+      _location = location;
     }
   }
 
@@ -166,17 +164,16 @@ class Targets {
   Targets.fromJson(Map<String, dynamic> json) {
     _name = json['name'];
     _url = json['url'];
-    _location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    _location =
+        json['location'] != null ? Location.fromJson(json['location']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this._name;
-    data['url'] = this._url;
-    if (this._location != null) {
-      data['location'] = this._location!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = _name;
+    data['url'] = _url;
+    if (_location != null) {
+      data['location'] = _location!.toJson();
     }
     return data;
   }

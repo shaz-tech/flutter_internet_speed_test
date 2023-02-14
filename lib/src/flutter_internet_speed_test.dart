@@ -13,13 +13,15 @@ typedef DefaultServerSelectionCallback = void Function(Client? client);
 
 class FlutterInternetSpeedTest {
   static const _defaultDownloadTestServer =
-      'http://speedtest.ftp.otenet.gr/files/test1Mb.db';
+      'http://speedtest.ftp.otenet.gr/files/test10Mb.db';
   static const _defaultUploadTestServer = 'http://speedtest.ftp.otenet.gr/';
+  static const _defaultFileSize = 10 * 1024 * 1024; //10 MB
 
   static final FlutterInternetSpeedTest _instance =
       FlutterInternetSpeedTest._private();
 
   bool _isTestInProgress = false;
+  bool _isCancelled = false;
 
   factory FlutterInternetSpeedTest() => _instance;
 
@@ -27,7 +29,7 @@ class FlutterInternetSpeedTest {
 
   bool isTestInProgress() => _isTestInProgress;
 
-  Future<bool> startTesting({
+  Future<void> startTesting({
     required ResultCallback onCompleted,
     DefaultCallback? onStarted,
     ResultCompletionCallback? onDownloadComplete,
@@ -36,23 +38,27 @@ class FlutterInternetSpeedTest {
     DefaultCallback? onDefaultServerSelectionInProgress,
     DefaultServerSelectionCallback? onDefaultServerSelectionDone,
     ErrorCallback? onError,
+    CancelCallback? onCancel,
     String? downloadTestServer,
     String? uploadTestServer,
-    int fileSizeInBytes = 10000000, //10 MB
+    int fileSizeInBytes = _defaultFileSize,
     bool useFastApi = true,
   }) async {
     if (_isTestInProgress) {
-      return false;
+      return;
     }
     if (await isInternetAvailable() == false) {
       if (onError != null) {
         onError('No internet connection', 'No internet connection');
       }
-      return false;
+      return;
     }
 
-    if (fileSizeInBytes < 10000000) fileSizeInBytes = 10000000; //10 MB
+    if (fileSizeInBytes < _defaultFileSize) {
+      fileSizeInBytes = _defaultFileSize;
+    }
     _isTestInProgress = true;
+
     if (onStarted != null) onStarted();
 
     if ((downloadTestServer == null || uploadTestServer == null) &&
@@ -62,6 +68,7 @@ class FlutterInternetSpeedTest {
       }
       final serverSelectionResponse =
           await FlutterInternetSpeedTestPlatform.instance.getDefaultServer();
+
       if (onDefaultServerSelectionDone != null) {
         onDefaultServerSelectionDone(serverSelectionResponse?.client);
       }
@@ -74,6 +81,15 @@ class FlutterInternetSpeedTest {
     if (downloadTestServer == null || uploadTestServer == null) {
       downloadTestServer = downloadTestServer ?? _defaultDownloadTestServer;
       uploadTestServer = uploadTestServer ?? _defaultUploadTestServer;
+    }
+
+    if (_isCancelled) {
+      if (onCancel != null) {
+        onCancel();
+        _isTestInProgress = false;
+        _isCancelled = false;
+        return;
+      }
     }
 
     final startDownloadTimeStamp = DateTime.now().millisecondsSinceEpoch;
@@ -100,15 +116,24 @@ class FlutterInternetSpeedTest {
 
             onCompleted(downloadResult, uploadResult);
             _isTestInProgress = false;
+            _isCancelled = false;
           },
           onProgress: (double percent, double transferRate, SpeedUnit unit) {
             final uploadProgressResult =
                 TestResult(TestType.UPLOAD, transferRate, unit);
-            if (onProgress != null) onProgress(percent, uploadProgressResult);
+            if (onProgress != null) {
+              onProgress(percent, uploadProgressResult);
+            }
           },
           onError: (String errorMessage, String speedTestError) {
             if (onError != null) onError(errorMessage, speedTestError);
             _isTestInProgress = false;
+            _isCancelled = false;
+          },
+          onCancel: () {
+            if (onCancel != null) onCancel();
+            _isTestInProgress = false;
+            _isCancelled = false;
           },
           fileSize: fileSizeInBytes,
           testServer: uploadTestServer!,
@@ -122,12 +147,16 @@ class FlutterInternetSpeedTest {
       onError: (String errorMessage, String speedTestError) {
         if (onError != null) onError(errorMessage, speedTestError);
         _isTestInProgress = false;
+        _isCancelled = false;
+      },
+      onCancel: () {
+        if (onCancel != null) onCancel();
+        _isTestInProgress = false;
+        _isCancelled = false;
       },
       fileSize: fileSizeInBytes,
       testServer: downloadTestServer,
     );
-
-    return true;
   }
 
   void enableLog() {
@@ -136,6 +165,11 @@ class FlutterInternetSpeedTest {
 
   void disableLog() {
     FlutterInternetSpeedTestPlatform.instance.toggleLog(value: false);
+  }
+
+  Future<bool> cancelTest() async {
+    _isCancelled = true;
+    return await FlutterInternetSpeedTestPlatform.instance.cancelTest();
   }
 
   bool get isLogEnabled => FlutterInternetSpeedTestPlatform.instance.logEnabled;

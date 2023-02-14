@@ -12,6 +12,7 @@ enum ListenerEnum {
   COMPLETE,
   ERROR,
   PROGRESS,
+  CANCEL,
 }
 
 enum SpeedUnit {

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter_internet_speed_test/src/models/server_selection_response.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
+import 'package:flutter_internet_speed_test/src/models/server_selection_response.dart';
 import 'package:flutter_internet_speed_test/src/speed_test_utils.dart';
+import 'package:http/http.dart' as http;
 import 'package:tuple_dart/tuple.dart';
 
 import 'callbacks_enum.dart';
@@ -64,6 +64,14 @@ class MethodChannelFlutterInternetSpeedTest
             unit = SpeedUnit.Mbps;
             callbacksById[call.arguments["id"]]!
                 .item2(call.arguments['percent'].toDouble(), rate, unit);
+          } else if (call.arguments['type'] == ListenerEnum.CANCEL.index) {
+            if (isLogEnabled) {
+              print('onCancel : ${call.arguments["id"]}');
+            }
+            callbacksById[call.arguments["id"]]!.item4();
+            downloadSteps = 0;
+            downloadRate = 0;
+            callbacksById.remove(call.arguments["id"]);
           }
         } else if (call.arguments["id"] as int ==
             CallbacksEnum.START_UPLOAD_TESTING.index) {
@@ -107,6 +115,14 @@ class MethodChannelFlutterInternetSpeedTest
             unit = SpeedUnit.Mbps;
             callbacksById[call.arguments["id"]]!
                 .item2(call.arguments['percent'].toDouble(), rate, unit);
+          } else if (call.arguments['type'] == ListenerEnum.CANCEL.index) {
+            if (isLogEnabled) {
+              print('onCancel : ${call.arguments["id"]}');
+            }
+            callbacksById[call.arguments["id"]]!.item4();
+            downloadSteps = 0;
+            downloadRate = 0;
+            callbacksById.remove(call.arguments["id"]);
           }
         }
 //        callbacksById[call.arguments["id"]](call.arguments["args"]);
@@ -122,7 +138,8 @@ class MethodChannelFlutterInternetSpeedTest
   }
 
   Future<CancelListening> _startListening(
-      Tuple3<ErrorCallback, ProgressCallback, DoneCallback> callback,
+      Tuple4<ErrorCallback, ProgressCallback, DoneCallback, CancelCallback>
+          callback,
       CallbacksEnum callbacksEnum,
       String testServer,
       {Map<String, dynamic>? args,
@@ -162,9 +179,10 @@ class MethodChannelFlutterInternetSpeedTest
       {required DoneCallback onDone,
       required ProgressCallback onProgress,
       required ErrorCallback onError,
+      required CancelCallback onCancel,
       required fileSize,
       required String testServer}) async {
-    return await _startListening(Tuple3(onError, onProgress, onDone),
+    return await _startListening(Tuple4(onError, onProgress, onDone, onCancel),
         CallbacksEnum.START_DOWNLOAD_TESTING, testServer,
         fileSize: fileSize);
   }
@@ -174,9 +192,10 @@ class MethodChannelFlutterInternetSpeedTest
       {required DoneCallback onDone,
       required ProgressCallback onProgress,
       required ErrorCallback onError,
+      required CancelCallback onCancel,
       required int fileSize,
       required String testServer}) async {
-    return await _startListening(Tuple3(onError, onProgress, onDone),
+    return await _startListening(Tuple4(onError, onProgress, onDone, onCancel),
         CallbacksEnum.START_UPLOAD_TESTING, testServer,
         fileSize: fileSize);
   }
@@ -213,5 +232,19 @@ class MethodChannelFlutterInternetSpeedTest
       }
     }
     return null;
+  }
+
+  @override
+  Future<bool> cancelTest() async {
+    var result = false;
+    try {
+      result = await _channel.invokeMethod("cancelTest", {
+        'id1': CallbacksEnum.START_DOWNLOAD_TESTING.index,
+        'id2': CallbacksEnum.START_UPLOAD_TESTING.index,
+      });
+    } on PlatformException {
+      result = false;
+    }
+    return result;
   }
 }

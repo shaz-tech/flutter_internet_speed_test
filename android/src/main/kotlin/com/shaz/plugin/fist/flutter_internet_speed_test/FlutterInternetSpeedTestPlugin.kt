@@ -2,11 +2,13 @@ package com.shaz.plugin.fist.flutter_internet_speed_test
 
 import android.app.Activity
 import android.content.Context
+import android.util.TimeUtils
 import fr.bmartel.speedtest.SpeedTestReport
 import fr.bmartel.speedtest.SpeedTestSocket
 import fr.bmartel.speedtest.inter.IRepeatListener
 import fr.bmartel.speedtest.inter.ISpeedTestListener
 import fr.bmartel.speedtest.model.SpeedTestError
+import fr.bmartel.speedtest.model.SpeedTestMode
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -14,12 +16,13 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.concurrent.TimeUnit
 
 /** FlutterInternetSpeedTestPlugin */
 class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
-    private val defaultFileSizeInBytes: Int = 10000000 //10 MB
-    private val defaultTestTimeoutInMillis: Int = 20000
-    private val defaultResponseDelayInMillis: Int = 300
+    private val defaultFileSizeInBytes: Int = 10 * 1024 * 1024 //10 MB
+    private val defaultTestTimeoutInMillis: Int = TimeUnit.SECONDS.toMillis(20).toInt()
+    private val defaultResponseDelayInMillis: Int = TimeUnit.MILLISECONDS.toMillis(500).toInt()
 
     private var result: Result? = null
     private var speedTestSocket: SpeedTestSocket = SpeedTestSocket()
@@ -38,11 +41,13 @@ class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, Activit
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
+        print("FlutterInternetSpeedTestPlugin: onMethodCall: ${call.method}")
         this.result = result
         when (call.method) {
             "startListening" -> mapToCall(result, call.arguments)
             "cancelListening" -> cancelListening(call.arguments, result)
             "toggleLog" -> toggleLog(call.arguments)
+            "cancelTest" -> cancelTasks(call.arguments, result)
             else -> result.notImplemented()
         }
     }
@@ -174,7 +179,6 @@ class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, Activit
                             }
                         }, testServer, fileSize)
                     }
-
                 }
                 // Send some value to callback
 
@@ -295,6 +299,48 @@ class FlutterInternetSpeedTestPlugin : FlutterPlugin, MethodCallHandler, Activit
         callbackById.remove(currentListenerId)
         // Do additional stuff if required to cancel the listener
         result.success(null)
+    }
+
+    private fun cancelTasks(arguments: Any?, result: Result) {
+        Thread(Runnable {
+            arguments?.let { args ->
+                val argsMap = args as Map<*, *>
+                try {
+                    if (speedTestSocket.speedTestMode != SpeedTestMode.NONE) {
+                        speedTestSocket.forceStopTask()
+                        result.success(true)
+
+                        if (argsMap.containsKey("id1")) {
+                            val id1 = argsMap["id1"] as Int
+                            val map: MutableMap<String, Any> = mutableMapOf()
+                            map["id"] = id1
+                            map["type"] = ListenerEnum.CANCEL.ordinal
+                            activity!!.runOnUiThread {
+                                methodChannel.invokeMethod("callListener", map)
+                            }
+                        }
+                        if (argsMap.containsKey("id2")) {
+                            val id2 = argsMap["id2"] as Int
+                            val map: MutableMap<String, Any> = mutableMapOf()
+                            map["id"] = id2
+                            map["type"] = ListenerEnum.CANCEL.ordinal
+                            activity!!.runOnUiThread {
+                                methodChannel.invokeMethod("callListener", map)
+                            }
+                        }
+
+                        speedTestSocket.clearListeners()
+                        speedTestSocket = SpeedTestSocket()
+                        return@Runnable
+                    }
+                } catch (e: Exception) {
+                    e.localizedMessage?.let { logger.print(it) }
+                }
+                result.success(false)
+            } ?: kotlin.run {
+                result.success(false)
+            }
+        }).start()
     }
 }
 
