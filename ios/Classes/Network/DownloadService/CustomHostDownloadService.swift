@@ -11,9 +11,9 @@ class CustomHostDownloadService: NSObject, SpeedService {
     func test(_ url: URL, fileSize: Int, timeout: TimeInterval, current: @escaping (Speed, Speed) -> (), final: @escaping (Result<Speed, NetworkError>) -> ()) {
         self.current = current
         self.final = final
-        let resultURL = HostURLFormatter(speedTestURL: url).downloadURL(size: fileSize)
+//         let resultURL = HostURLFormatter(speedTestURL: url).downloadURL(size: fileSize)
         task = URLSession(configuration: sessionConfiguration(timeout: timeout), delegate: self, delegateQueue: OperationQueue.main)
-            .downloadTask(with: resultURL)
+            .downloadTask(with: url)
         task?.resume()
     }
     
