@@ -2,10 +2,10 @@
 
 # Flutter Internet Speed Test
 
-![Flutter](https://img.shields.io/badge/_Flutter_-Package-grey.svg?&logo=Flutter&logoColor=white&labelColor=blue)
-![Pub Version](https://img.shields.io/pub/v/flutter_internet_speed_test?color=orange&label=version)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/shaz-tech/flutter_internet_speed_test?color=blueviolet)
-![GitHub](https://img.shields.io/github/license/shaz-tech/flutter_internet_speed_test)
+[![Flutter](https://img.shields.io/badge/_Flutter_-Package-grey.svg?&logo=Flutter&logoColor=white&labelColor=blue)](https://pub.dev/packages/flutter_internet_speed_test)
+[![Pub Version](https://img.shields.io/pub/v/flutter_internet_speed_test?color=orange&label=version)](https://pub.dev/packages/flutter_internet_speed_test)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/shaz-tech/flutter_internet_speed_test?color=blueviolet)](https://pub.dev/packages/flutter_internet_speed_test)
+[![GitHub](https://img.shields.io/github/license/shaz-tech/flutter_internet_speed_test)](https://pub.dev/packages/flutter_internet_speed_test)
  
 </div>
 A Flutter plugin to test internet download and upload speed.
