@@ -2,7 +2,6 @@ package com.shaz.plugin.fist.flutter_internet_speed_test
 
 import android.app.Activity
 import android.content.Context
-import android.util.TimeUtils
 import fr.bmartel.speedtest.SpeedTestReport
 import fr.bmartel.speedtest.SpeedTestSocket
 import fr.bmartel.speedtest.inter.IRepeatListener

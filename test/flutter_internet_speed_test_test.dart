@@ -1,5 +1,3 @@
-
-
 /*class MockFlutterInternetSpeedTestPlatform
     with MockPlatformInterfaceMixin
     implements FlutterInternetSpeedTestPlatform {

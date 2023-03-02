@@ -42,3 +42,8 @@
 * Added cancel method and callback to cancel the ongoing test
 * Bug fixes: https://github.com/shaz-tech/flutter_internet_speed_test/issues/3
 * Updated dependencies
+
+## 1.4.0
+
+* Bug fixes: https://github.com/shaz-tech/flutter_internet_speed_test/issues/4
+* Code refactor
