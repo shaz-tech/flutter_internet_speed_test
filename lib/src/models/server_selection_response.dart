@@ -78,10 +78,6 @@ class Targets {
   late final String? url;
   late final Location? location;
 
-  Targets({this.name, this.url, this.location});
-
-  set location(Location? location) => location = location;
-
   Targets.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     url = json['url'];
