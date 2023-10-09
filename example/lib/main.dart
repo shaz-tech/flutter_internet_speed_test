@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_internet_speed_test/flutter_internet_speed_test.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:kdgaugeview/kdgaugeview.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +20,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final internetSpeedTest = FlutterInternetSpeedTest()..enableLog();
 
+  bool abcdef = true;
+
   bool _testInProgress = false;
   double _downloadRate = 0;
   double _uploadRate = 0;
@@ -24,6 +30,8 @@ class _MyAppState extends State<MyApp> {
   int _downloadCompletionTime = 0;
   int _uploadCompletionTime = 0;
   bool _isServerSelectionInProgress = false;
+
+  GlobalKey<KdGaugeViewState> key = GlobalKey<KdGaugeViewState>();
 
   String? _ip;
   String? _asn;
@@ -44,47 +52,96 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('FlutterInternetSpeedTest example'),
+          title: Center(child: const Text('Crave Internet Speed Test')),
         ),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text(
-                    'Download Speed',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
+              SfRadialGauge(
+                title: GaugeTitle(
+                    text: abcdef ? 'Download Speed' : 'Upload Speed'),
+                enableLoadingAnimation: true,
+                axes: <RadialAxis>[
+                  RadialAxis(minimum: 0, maximum: 100, ranges: <GaugeRange>[
+                    GaugeRange(
+                        startValue: 0,
+                        endValue: 33,
+                        color: Colors.red,
+                        startWidth: 10,
+                        endWidth: 10),
+                    GaugeRange(
+                        startValue: 33,
+                        endValue: 66,
+                        color: Colors.orange,
+                        startWidth: 10,
+                        endWidth: 10),
+                    GaugeRange(
+                        startValue: 66,
+                        endValue: 100,
+                        color: Colors.green,
+                        startWidth: 10,
+                        endWidth: 10)
+                  ], pointers: <GaugePointer>[
+                    NeedlePointer(value: abcdef ? _downloadRate : _uploadRate,
+                    enableAnimation: true,
+                    
                     ),
-                  ),
-                  Text('Progress: $_downloadProgress%'),
-                  Text('Download Rate: $_downloadRate $_unitText'),
-                  if (_downloadCompletionTime > 0)
-                    Text(
-                        'Time taken: ${(_downloadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
+                  ], annotations: <GaugeAnnotation>[
+                    GaugeAnnotation(
+                        widget: Container(
+                            child: Text(
+                                abcdef
+                                    ? ' $_downloadRate'+ ' Mbps'
+                                    : '$_uploadRate' + ' Mbps',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold))),
+                        angle: 90,
+                        positionFactor: 0.5)
+                  ]),
                 ],
               ),
-              const SizedBox(
-                height: 32.0,
-              ),
-              Column(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text(
-                    'Upload Speed',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                children: [
+                  Column(
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Text(
+                        'Download Speed',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text('Progress: $_downloadProgress%'),
+                      Text('Download Rate: $_downloadRate $_unitText'),
+                      if (_downloadCompletionTime > 0)
+                        Text(
+                            'Time taken: ${(_downloadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
+                    ],
                   ),
-                  Text('Progress: $_uploadProgress%'),
-                  Text('Upload Rate: $_uploadRate $_unitText'),
-                  if (_uploadCompletionTime > 0)
-                    Text(
-                        'Time taken: ${(_uploadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
+                  const SizedBox(
+                    width: 32.0,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Text(
+                        'Upload Speed',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text('Progress: $_uploadProgress%'),
+                      Text('Upload Rate: $_uploadRate $_unitText'),
+                      if (_uploadCompletionTime > 0)
+                        Text(
+                            'Time taken: ${(_uploadCompletionTime / 1000).toStringAsFixed(2)} sec(s)'),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(
@@ -162,6 +219,7 @@ class _MyAppState extends State<MyApp> {
                         _unitText =
                             data.unit == SpeedUnit.kbps ? 'Kbps' : 'Mbps';
                         _downloadCompletionTime = data.durationInMillis;
+                        abcdef = false;
                       });
                     }, onUploadComplete: (TestResult data) {
                       setState(() {
@@ -169,6 +227,7 @@ class _MyAppState extends State<MyApp> {
                         _unitText =
                             data.unit == SpeedUnit.kbps ? 'Kbps' : 'Mbps';
                         _uploadCompletionTime = data.durationInMillis;
+                        abcdef = true;
                       });
                     }, onCancel: () {
                       reset();
@@ -176,7 +235,23 @@ class _MyAppState extends State<MyApp> {
                   },
                 )
               } else ...{
-                const CircularProgressIndicator(),
+                // CircularProgressIndicator()
+                // SpinKitThreeInOut(
+                //
+                //   size: 50.0,
+                //   color: Colors.grey,
+                // )
+
+                SpinKitThreeInOut(
+                  itemBuilder: (BuildContext context, int index) {
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: index.isEven ? Colors.blueGrey : Colors.green,
+                      ),
+                    );
+                  },
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextButton.icon(
