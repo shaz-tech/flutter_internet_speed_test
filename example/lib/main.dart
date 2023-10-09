@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_internet_speed_test/flutter_internet_speed_test.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:kdgaugeview/kdgaugeview.dart';
+import 'package:lottie/lottie.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -195,7 +196,8 @@ class _MyAppState extends State<MyApp> {
                           _uploadRate = data.transferRate;
                           _uploadProgress = percent.toStringAsFixed(2);
                         }
-                      });
+                      }
+                      );
                     }, onError: (String errorMessage, String speedTestError) {
                       if (kDebugMode) {
                         print(
@@ -242,16 +244,24 @@ class _MyAppState extends State<MyApp> {
                 //   color: Colors.grey,
                 // )
 
-                SpinKitThreeInOut(
-                  itemBuilder: (BuildContext context, int index) {
-                    return DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: index.isEven ? Colors.blueGrey : Colors.green,
-                      ),
-                    );
-                  },
+                Lottie.asset(
+                  'animations/loading time.json',
+                  height: 100,
+                  repeat: true,
+                  reverse: false,
+                  fit: BoxFit.cover
                 ),
+
+                // SpinKitThreeInOut(
+                //   itemBuilder: (BuildContext context, int index) {
+                //     return DecoratedBox(
+                //       decoration: BoxDecoration(
+                //         borderRadius: BorderRadius.circular(50),
+                //         color: index.isEven ? Colors.blueGrey : Colors.green,
+                //       ),
+                //     );
+                //   },
+                // ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextButton.icon(
