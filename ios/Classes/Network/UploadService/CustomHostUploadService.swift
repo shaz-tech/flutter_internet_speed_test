@@ -30,7 +30,7 @@ class CustomHostUploadService: NSObject, SpeedService {
 
 extension CustomHostUploadService: URLSessionDataDelegate {
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Swift.Void) {
-        let result = calculate(bytes: dataTask.countOfBytesSent, seconds: Date().timeIntervalSince(self.responseDate!))
+    let result = calculate(bytes: dataTask.countOfBytesSent, seconds: Date().timeIntervalSince(self.responseDate ?? Date()))
         self.final(.value(result))
         responseDate = nil
     }
