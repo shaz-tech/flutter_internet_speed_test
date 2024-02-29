@@ -15,7 +15,7 @@ dependencies:
   #tuple: ^2.0.0
   tuple_dart: ^1.4.2
   connectivity_plus: ^3.0.3
-  http: ^0.13.5
+  http: ^1.1.2
   logger: ^1.1.0
 
 dev_dependencies:
