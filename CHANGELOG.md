@@ -47,3 +47,8 @@
 
 * Bug fixes: https://github.com/shaz-tech/flutter_internet_speed_test/issues/4
 * Code refactor
+
+## 1.5.0
+
+* Updated dependencies
+* Bug fixes: https://github.com/shaz-tech/flutter_internet_speed_test/issues/6, https://github.com/shaz-tech/flutter_internet_speed_test/issues/10
