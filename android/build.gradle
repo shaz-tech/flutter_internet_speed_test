@@ -25,6 +25,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'com.shaz.plugin.fist.flutter_internet_speed_test'
     compileSdkVersion 31
 
     compileOptions {
